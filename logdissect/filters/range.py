@@ -45,12 +45,9 @@ class FilterModule(OurModule):
         ourlimits = value.split('-')
 
         newdata = {}
-        if 'parser' in data.keys():
-            newdata['parser'] = data['parser']
-            newdata['source_path'] = data['source_path']
-            newdata['source_file'] = data['source_file']
-            newdata['source_file_mtime'] = data['source_file_mtime']
-            newdata['source_file_year'] = data['source_file_year']
+        for key in data:
+            if key != 'entries':
+                newdata[key] = data[key]
         newdata['entries'] = []
 
         firstdate = int(ourlimits[0].ljust(14, '0'))

@@ -28,6 +28,7 @@ import string
 import logdissect.parsers
 import logdissect.filters
 import logdissect.output
+import logdissect.input.file
 from logdissect import __version__
 from argparse import ArgumentParser
 import gettext
@@ -85,7 +86,18 @@ class LogDissectCore:
         parsedset = {}
         parsedset['data_set'] = []
         for log in self.input_files:
-            parsemodule = self.parse_modules[self.args.parser]
+            if self.args.input_format:
+                try:
+                    parsemodule = logdissect.input.file.resolve_parser(
+                            self.args.input_format, log)
+                except ValueError as err:
+                    print(str(err))
+                    sys.exit(1)
+                if parsemodule is None:
+                    print('Could not detect input format for ' + log)
+                    sys.exit(1)
+            else:
+                parsemodule = self.parse_modules[self.args.parser]
             try:
                 if self.args.tzone:
                     parsemodule.tzone = self.args.tzone
@@ -138,6 +150,11 @@ class LogDissectCore:
         self.arg_parser.add_argument('-p',
                 action='store', dest='parser', default='syslog',
                 help=_('select a parser (default: syslog)'))
+        self.arg_parser.add_argument('-i',
+                action='store', dest='input_format', default=None,
+                metavar='FORMAT',
+                help=_('select an input format (e.g. nginx), '
+                    'or "auto" to sniff'))
         self.arg_parser.add_argument('-z', '--unzip',
                 action='store_true', dest='unzip',
                 help=_('include files compressed with gzip'))
