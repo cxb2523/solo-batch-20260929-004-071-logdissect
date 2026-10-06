@@ -206,6 +206,12 @@ def merge_logs(dataset, sort=True):
     ourlog['entries'] = []
     for d in dataset:
         ourlog['entries'] = ourlog['entries'] + d['entries']
+        # Streaming inputs (e.g. nginx) carry line counters; sum them
+        # so skips/filtered lines survive a multi-file merge.
+        for counter in ('lines_total', 'lines_parsed',
+                'lines_skipped', 'lines_filtered'):
+            if counter in d:
+                ourlog[counter] = ourlog.get(counter, 0) + d[counter]
     if sort and all('numeric_date_stamp_utc' in entry for entry in ourlog['entries']):
         ourlog['entries'].sort(key= lambda x: x['numeric_date_stamp_utc'])
 

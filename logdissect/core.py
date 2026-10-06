@@ -33,6 +33,96 @@ from argparse import ArgumentParser
 import gettext
 gettext.install('logdissect')
 
+# Counters shared by streaming inputs and the last/range filters.
+# Skipped lines live here (not on the floor) so every stage can audit
+# the identity:
+#   lines_total == lines_parsed + lines_skipped
+#   len(entries) == lines_parsed - lines_filtered
+COUNT_FIELDS = ('lines_total', 'lines_parsed',
+        'lines_skipped', 'lines_filtered')
+
+
+class LogObject(dict):
+    """One parsed log stream plus its line-accounting counters.
+
+    It is a ``dict`` so it drops straight into the legacy filter/output
+    pipeline (which keys into ``entries`` and friends). The authoritative
+    sort key is :data:`SORT_KEY` -- ``numeric_date_stamp_utc`` -- and
+    every input, including the nginx combined parser, must normalize to
+    UTC before writing it. Mixing raw ``+0800`` wall-clock strings into
+    this key would shift entries by the offset during merge sort.
+    """
+
+    SORT_KEY = 'numeric_date_stamp_utc'
+
+    def __init__(self, *args, **kwargs):
+        """Initialize with zeroed counters and an empty entry list."""
+        super(LogObject, self).__init__(*args, **kwargs)
+        self.setdefault('entries', [])
+        for field in COUNT_FIELDS:
+            self.setdefault(field, 0)
+
+    def add_raw_line(self):
+        """Account for one physical line read from the source."""
+        self['lines_total'] += 1
+
+    def add_entry(self, entry):
+        """Accept a parsed entry and its counters."""
+        self['entries'].append(entry)
+        self['lines_parsed'] += 1
+
+    def count_entry(self):
+        """Count a parsed entry without retaining its dict.
+
+        The resident tail pipeline only needs aggregate state plus a
+        bounded set of samples; storing every entry dict would let
+        resident memory grow without bound on a 100MiB+ feed. Filters
+        are not applied on that path, so the remaining invariant is
+        ``lines_total == lines_parsed + lines_skipped``.
+        """
+        self['lines_parsed'] += 1
+
+    def add_skip(self):
+        """Account for one malformed line that was skipped, not dropped."""
+        self['lines_skipped'] += 1
+
+    def sort_entries(self):
+        """Sort entries on the shared UTC sort key."""
+        self['entries'].sort(key=lambda e: e.get(self.SORT_KEY, '0'))
+        return self
+
+    def record_filter_result(self, kept_entries):
+        """Set ``lines_filtered`` from what a filter kept.
+
+        The invariant afterwards is
+        ``len(entries) == lines_parsed - lines_filtered``.
+        """
+        removed = self['lines_parsed'] - len(kept_entries)
+        self['lines_filtered'] = removed if removed > 0 else 0
+        self['entries'] = kept_entries
+        return self
+
+    def reconcile(self):
+        """Return ``True`` when the counters and entries add up."""
+        if self['lines_total'] != \
+                self['lines_parsed'] + self['lines_skipped']:
+            return False
+        if len(self['entries']) != \
+                self['lines_parsed'] - self['lines_filtered']:
+            return False
+        return True
+
+    @classmethod
+    def merge(cls, logs):
+        """Merge several logs, summing counters and sorting on UTC."""
+        merged = cls()
+        for log in logs:
+            merged['entries'].extend(log.get('entries', []))
+            for field in COUNT_FIELDS:
+                merged[field] += log.get(field, 0)
+        merged.sort_entries()
+        return merged
+
 
 class LogDissectCore:
 

@@ -78,4 +78,12 @@ class FilterModule(OurModule):
                 if dstamp >= ourstart: 
                     newdata['entries'].append(entry)
 
+        # Account for every entry this filter removed so counters stay
+        # auditable: lines_parsed - lines_filtered == len(entries).
+        newdata['lines_filtered'] = data.get('lines_filtered', 0) + \
+                (len(data['entries']) - len(newdata['entries']))
+        for counter in ('lines_total', 'lines_parsed', 'lines_skipped'):
+            if counter in data:
+                newdata[counter] = data[counter]
+
         return newdata

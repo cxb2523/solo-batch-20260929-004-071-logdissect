@@ -28,7 +28,7 @@ class ParseModule(OurModule):
         self.name = 'syslognohost'
         self.desc = 'syslog (standard timestamp, no host) parsing module'
         self.format_regex = \
-                '^([A-Z][a-z]{2}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+([^\[\] ]+)\[?(\d*)\]?: (.*)'
+                r'^([A-Z][a-z]{2}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+([^\[\] ]+)\[?(\d*)\]?: (.*)'
         self.fields = ['date_stamp', 'source_process', 'source_pid', 'message']
         self.backup_format_regex = None
         self.backup_fields = []

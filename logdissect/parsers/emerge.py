@@ -27,7 +27,7 @@ class ParseModule(OurModule):
         """Initialize a gentoo emerge log parsing module"""
         self.name = 'emerge'
         self.desc = 'gentoo emerge log parsing module'
-        self.format_regex = '^(\d+\.?\d*):\s(.*)$'
+        self.format_regex = r'^(\d+\.?\d*):\s(.*)$'
         # fractional seconds added for future-proofing
         self.fields = ['date_stamp', 'prefix', 'message']
         self.backup_format_regex = None

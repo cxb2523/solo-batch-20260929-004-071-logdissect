@@ -6,7 +6,7 @@ class ParseModule(OurModule):
         self.name = 'dotnetDefault'
         self.desc = '.Net Core Build parsing module'
         self.format_regex = \
-                '^(?:\s+)?(?:\d+>)?(.*?)(?:\((\d+),(\d+)\))?:\s+(\w+)\s+(\w+\d+):\s+(.*)$'
+                r'^(?:\s+)?(?:\d+>)?(.*?)(?:\((\d+),(\d+)\))?:\s+(\w+)\s+(\w+\d+):\s+(.*)$'
         self.fields = ["filepath","line_number","column_number","log_type","error_code","description"]
 
         self.backup_format_regex = None

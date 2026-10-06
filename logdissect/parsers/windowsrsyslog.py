@@ -28,7 +28,7 @@ class ParseModule(OurModule):
         self.name = 'windowsrsyslog'
         self.desc = 'windows rsyslog agent log parsing module'
         self.format_regex = \
-                "^([A-Z][a-z]{2}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+(\S+)\s+(\S+)\s+(.*)"
+                r"^([A-Z][a-z]{2}\s+\d{1,2}\s+\d{2}:\d{2}:\d{2})\s+(\S+)\s+(\S+)\s+(.*)"
         self.fields = ['date_stamp', 'log_source', 'source_process',
             'message']
         self.backup_format_regex = None

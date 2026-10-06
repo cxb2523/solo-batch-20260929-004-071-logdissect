@@ -29,15 +29,15 @@ class ParseModule(OurModule):
         self.name = 'tcpdump'
         self.desc = 'tcpdump terminal output parsing module'
         self.format_regex = \
-                "^(\d{2}:\d{2}:\d{2}\.?\d*)\s+(\w+)\s+([\w\-\.]+)\s+>\s+([\w\-\.]+): (.*)"
+                r"^(\d{2}:\d{2}:\d{2}\.?\d*)\s+(\w+)\s+([\w\-\.]+)\s+>\s+([\w\-\.]+): (.*)"
         self.fields = ['date_stamp', 'protocol', 'source_host', 'dest_host',
                 'message']
         self.backup_format_regex = \
-                "^(\d{2}:\d{2}:\d{2}\.?\d*)\s+(\w+),\s+(.*)"
+                r"^(\d{2}:\d{2}:\d{2}\.?\d*)\s+(\w+),\s+(.*)"
         self.backup_fields = ['date_stamp', 'protocol', 'message']
         self.tzone = None
         self.datestamp_type = 'nodate'
-        self.ip_port_regex = re.compile('^(\d+\.\d+\.\d+\.\d+\.\w+)$')
+        self.ip_port_regex = re.compile(r'^(\d+\.\d+\.\d+\.\d+\.\w+)$')
 
     def post_parse_action(self, entry):
         """separate hosts and ports after entry is parsed"""

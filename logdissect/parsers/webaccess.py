@@ -28,12 +28,12 @@ class ParseModule(OurModule):
         self.name = 'webaccess'
         self.desc = 'web access log parsing module'
         self.format_regex = \
-                '^(\S+)\s+-\s+-\s+\[(\S+)\s+([0-9+-]+)\]\s+"(\S+)\s+(\S+)\s+(\S+)"\s+(\d+)\s+(\d+)\s+"(\S+)"\s+"(.*)"'
+                r'^(\S+)\s+-\s+-\s+\[(\S+)\s+([0-9+-]+)\]\s+"(\S+)\s+(\S+)\s+(\S+)"\s+(\d+)\s+(\d+)\s+"(\S+)"\s+"(.*)"'
         self.fields = ['source_host', 'date_stamp', 'tzone', 'method',
                 'path', 'protocol', 'status', 'byte_count',
                 'referrer', 'user_agent_string']
         self.backup_format_regex = \
-                '^(\S+)\s+-\s+-\s+\[(\S+)\]\s+"(\S+)\s+(\S+)\s+(\S+)"\s+(\d+)\s+(\d+)\s+"(\S+)"\s+"(.*)"'
+                r'^(\S+)\s+-\s+-\s+\[(\S+)\]\s+"(\S+)\s+(\S+)\s+(\S+)"\s+(\d+)\s+(\d+)\s+"(\S+)"\s+"(.*)"'
         self.backup_fields = ['source_host', 'date_stamp', 'method',
                 'path', 'protocol', 'status', 'byte_count',
                 'referrer', 'user_agent_string']
